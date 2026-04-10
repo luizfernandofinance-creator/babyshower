@@ -906,6 +906,9 @@ footer {
   🇧🇷 Translate to Português
 </button>
 
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"></script>
+
 <script>
 /* ── Stars & botanicals ── */
 const starsEl = document.getElementById('stars');
@@ -916,13 +919,27 @@ for (let i = 0; i < 90; i++) {
   s.style.top = Math.random() * 100 + '%';
   const sz = 1 + Math.random() * 2.5;
   s.style.width = sz + 'px'; s.style.height = sz + 'px';
-  // Gold stars near top, green fireflies near bottom
   const isGold = Math.random() > 0.6;
   s.style.background = isGold ? 'rgba(232,196,106,0.8)' : 'rgba(168,216,191,0.7)';
   s.style.setProperty('--d', (2 + Math.random() * 4).toFixed(1) + 's');
   s.style.animationDelay = (Math.random() * 5).toFixed(1) + 's';
   starsEl.appendChild(s);
 }
+
+// ✅ PASTE YOUR FIREBASE CONFIG HERE
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY_HERE",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.database(app);
 
 /* ── Role picker (removed) ── */
 let selectedRole = '';
@@ -984,41 +1001,31 @@ document.getElementById('inp-photo').addEventListener('change', e => {
   reader.readAsDataURL(file);
 });
 
-/* ── Anthropic API (shared storage via Claude) ── */
-const API_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-20250514';
-
-// We use the persistent storage API via an artifact-like mechanism
-// Since we're in an HTML file context, we'll use the window.storage API if available,
-// otherwise fall back to a Claude-powered shared approach using the Anthropic API
-// as a message-passing layer with a known conversation thread per "room".
-
-// For robust shared storage, we embed the wishes as JSON in API calls
-// using a deterministic system prompt as a "database read/write" pattern.
-
-const STORAGE_KEY = 'daniel_baby_shower_wishes_v1';
-const SHARED_KEY = 'daniel_shower_shared';
-
-// Try window.storage (persistent artifact storage) first
+/* ── FIREBASE STORAGE ── */
 async function loadWishesFromStorage() {
-  if (window.storage) {
-    try {
-      const result = await window.storage.get(STORAGE_KEY, true); // shared=true
-      if (result && result.value) return JSON.parse(result.value);
-    } catch(e) {}
-  }
-  // Fallback to localStorage
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+  return new Promise((resolve) => {
+    db.ref('wishes').once('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const wishesArray = Object.values(data);
+        resolve(wishesArray);
+      } else {
+        resolve([]);
+      }
+    });
+  });
 }
 
 async function saveWishesToStorage(wishes) {
-  if (window.storage) {
-    try {
-      await window.storage.set(STORAGE_KEY, JSON.stringify(wishes), true); // shared=true
-      return;
-    } catch(e) {}
+  try {
+    const newWish = wishes[wishes.length - 1];
+    const ref = db.ref('wishes').push();
+    await ref.set(newWish);
+    console.log('Wish saved to Firebase!');
+  } catch(err) {
+    console.error('Error saving to Firebase:', err);
+    throw err;
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes));
 }
 
 /* ── Render ── */
@@ -1154,24 +1161,25 @@ renderWall();
 // Refresh wall every 30s to catch other guests' messages
 setInterval(renderWall, 30000);
 
-// Seed sample wishes if empty (first load only)
-async function seedIfEmpty() {
-  const existing = await loadWishesFromStorage();
-  if (existing.length > 0) return;
-  const seeds = [
-    { name: 'Uncle Jeff', role: 'Friend / Amigo', location: 'Dublin, Ireland', lang: 'pt', message: 'Daniel, você já é o maior amor da sua família. Que você cresça cheio de alegria, saúde e a força das duas terras que te pertencem.', photo: '', ts: Date.now() - 120000 },
-    { name: 'Uncle Kieran', role: 'Friend / Amigo', location: 'Dublin, Ireland', lang: 'en', message: 'Little Daniel — you\'re going to have the best of both worlds. The céad míle fáilte of Ireland and the warmth of Brazil will follow you everywhere.', photo: '', ts: Date.now() - 80000 },
-  ];
-  await saveWishesToStorage(seeds);
-  renderWall();
-}
-seedIfEmpty();
-
-/* ── Translate button ── */
+// Translate button
 document.getElementById('translate-btn').addEventListener('click', () => {
   const url = encodeURIComponent(window.location.href);
   window.open('https://translate.google.com/translate?sl=en&tl=pt&u=' + url, '_blank');
 });
 </script>
+⚠️ Important: Replace the placeholder values
+
+In the firebaseConfig, you need to replace these with YOUR actual values from Firebase:
+
+JavaScript
+const firebaseConfig = {
+  apiKey: "AIzaSyD_XXXXXX",  // ← Your actual API key
+  authDomain: "daniel-baby-shower-abc123.firebaseapp.com",  // ← Your domain
+  databaseURL: "https://daniel-baby-shower-abc123.firebaseio.com",  // ← Your database URL
+  projectId: "daniel-baby-shower-abc123",  // ← Your project ID
+  storageBucket: "daniel-baby-shower-abc123.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abc123def456"
+};
 </body>
 </html>
