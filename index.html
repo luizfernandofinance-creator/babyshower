@@ -752,9 +752,9 @@ footer {
   <h1 class="hero-name"><span>Daniel</span></h1>
 
   <p class="hero-tagline">
-    Born of two worlds, loved by one family.<br>
+    Born of two worlds, loved from Brazil to Ireland and beyond.<br>
     <strong>Rosana &amp; Diego</strong> are expecting their little explorer —<br>
-    and we are all here to greet him.
+    already surrounded by love from near and far.
   </p>
 
   <div class="flag-ribbon">
@@ -795,7 +795,7 @@ footer {
       </div>
     </div>
     <p class="bridge-caption">
-      "He carries the green of Irish fields and the gold of the cerrado sun — all of it his to explore."
+      He carries the green of Irish fields and the gold of the cerrado sun — all of it his to explore.
     </p>
   </div>
 </div>
@@ -1159,9 +1159,8 @@ async function seedIfEmpty() {
   const existing = await loadWishesFromStorage();
   if (existing.length > 0) return;
   const seeds = [
-    { name: 'Vovó Maria', role: 'Family / Família', location: 'Brasília, Brasil', lang: 'pt', message: 'Daniel, você já é o maior amor desta família. Que você cresça cheio de alegria, saúde e a força das duas terras que te pertencem.', photo: '', ts: Date.now() - 120000 },
-    { name: 'Uncle Pádraig', role: 'Family / Família', location: 'Cork, Ireland', lang: 'en', message: 'Little Daniel — you\'re going to have the best of both worlds. The céad míle fáilte of Ireland and the warmth of Brazil will follow you everywhere.', photo: '', ts: Date.now() - 80000 },
-    { name: 'Ana & Rafael', role: 'Friend / Amigo', location: 'São Paulo, Brasil', lang: 'pt', message: 'Rosana e Diego, que Daniel chegue com saúde e amor em abundância. Já temos saudades dele!', photo: '', ts: Date.now() - 40000 }
+    { name: 'Uncle Jeff', role: 'Friend / Amigo', location: 'Dublin, Ireland', lang: 'pt', message: 'Daniel, você já é o maior amor da sua família. Que você cresça cheio de alegria, saúde e a força das duas terras que te pertencem.', photo: '', ts: Date.now() - 120000 },
+    { name: 'Uncle Kieran', role: 'Friend / Amigo', location: 'Dublin, Ireland', lang: 'en', message: 'Little Daniel — you\'re going to have the best of both worlds. The céad míle fáilte of Ireland and the warmth of Brazil will follow you everywhere.', photo: '', ts: Date.now() - 80000 },
   ];
   await saveWishesToStorage(seeds);
   renderWall();
